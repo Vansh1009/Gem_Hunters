@@ -160,6 +160,81 @@ public class Board
     }
 }
 
+public class Game
+{
+    public Board Board { get; }
+    public Player Player1 { get; }
+    public Player Player2 { get; }
+    public Player CurrentTurn { get; private set; }
+    public int TotalTurns { get; private set; }
+
+    public Game()
+    {
+        Board = new Board();
+        Player1 = new Player("P1", new Position(0, 0));
+        Player2 = new Player("P2", new Position(5, 5));
+        CurrentTurn = Player1;
+        TotalTurns = 0;
+    }
+
+    public void Start()
+    {
+        while (!IsGameOver())
+        {
+            Console.WriteLine($"Turn {TotalTurns + 1}");
+            Board.Display();
+            Console.WriteLine($"Current player: {CurrentTurn.Name}");
+            Console.Write("Enter move (U/D/L/R): ");
+            char direction = char.ToUpper(Console.ReadKey().KeyChar);
+            Console.WriteLine();
+
+            if (Board.IsValidMove(CurrentTurn, direction))
+            {
+                CurrentTurn.Move(direction);
+                Board.CollectGem(CurrentTurn);
+                TotalTurns++;
+                SwitchTurn();
+            }
+            else
+            {
+                Console.WriteLine("Invalid move. Try again.");
+            }
+        }
+
+        AnnounceWinner();
+    }
+
+    public void SwitchTurn()
+    {
+        CurrentTurn = CurrentTurn == Player1 ? Player2 : Player1;
+    }
+
+    public bool IsGameOver()
+    {
+        return TotalTurns >= 30;
+    }
+
+    public void AnnounceWinner()
+    {
+        Console.WriteLine("Game Over!");
+        Console.WriteLine($"Player 1 collected {Player1.GemCount} gems.");
+        Console.WriteLine($"Player 2 collected {Player2.GemCount} gems.");
+
+        if (Player1.GemCount > Player2.GemCount)
+        {
+            Console.WriteLine("Player 1 wins!");
+        }
+        else if (Player2.GemCount > Player1.GemCount)
+        {
+            Console.WriteLine("Player 2 wins!");
+        }
+        else
+        {
+            Console.WriteLine("It's a tie!");
+        }
+    }
+}
+
 class Program
 {
     static void Main(string[] args)
