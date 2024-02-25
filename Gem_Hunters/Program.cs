@@ -48,6 +48,117 @@ public class Player
     }
 }
 
+public class Cell
+{
+    public string Occupant { get; set; }
+}
+
+public class Board
+{
+    public Cell[,] Grid { get; }
+    private readonly Random _random;
+
+    public Board()
+    {
+        Grid = new Cell[6, 6];
+        _random = new Random();
+        InitializeBoard();
+    }
+
+    private void InitializeBoard()
+    {
+        // Initialize all cells with empty occupant
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                Grid[i, j] = new Cell { Occupant = "-" };
+            }
+        }
+
+        // Place players
+        Grid[0, 0].Occupant = "P1";
+        Grid[5, 5].Occupant = "P2";
+
+        // Place gems
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                if (_random.Next(10) < 2) // 20% chance of placing a gem
+                {
+                    Grid[i, j].Occupant = "G";
+                }
+            }
+        }
+
+        // Place obstacles
+        for (int i = 0; i < 6; i++)
+        {
+            int obsX = _random.Next(6);
+            int obsY = _random.Next(6);
+            Grid[obsX, obsY].Occupant = "O";
+        }
+    }
+
+    public void Display()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                Console.Write(Grid[i, j].Occupant + " ");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    public bool IsValidMove(Player player, char direction)
+    {
+        int newX = player.Position.X;
+        int newY = player.Position.Y;
+
+        switch (direction)
+        {
+            case 'U':
+                newY--;
+                break;
+            case 'D':
+                newY++;
+                break;
+            case 'L':
+                newX--;
+                break;
+            case 'R':
+                newX++;
+                break;
+            default:
+                return false;
+        }
+
+        if (newX < 0 || newX >= 6 || newY < 0 || newY >= 6)
+        {
+            return false; // Out of bounds
+        }
+
+        if (Grid[newY, newX].Occupant == "O")
+        {
+            return false; // Obstacle
+        }
+
+        return true;
+    }
+
+    public void CollectGem(Player player)
+    {
+        if (Grid[player.Position.Y, player.Position.X].Occupant == "G")
+        {
+            player.GemCount++;
+            Grid[player.Position.Y, player.Position.X].Occupant = "-";
+            Console.WriteLine($"{player.Name} collected a gem!");
+        }
+    }
+}
 
 class Program
 {
